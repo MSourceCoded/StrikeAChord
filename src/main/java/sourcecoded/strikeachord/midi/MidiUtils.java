@@ -90,7 +90,7 @@ public class MidiUtils {
                     }
 
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(20);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
