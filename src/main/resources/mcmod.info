@@ -1,0 +1,16 @@
+[
+{
+  "modid": "strikeachord",
+  "name": "Strike A Chord",
+  "description": "Want more sound in Minecraft? Want to show off your wonderful music skills to the whole server? Well, now you can!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["MrSourceCoded"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
