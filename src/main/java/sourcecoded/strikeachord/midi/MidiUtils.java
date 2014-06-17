@@ -1,5 +1,8 @@
 package sourcecoded.strikeachord.midi;
 
+import sourcecoded.strikeachord.eventsystem.EventBus;
+import sourcecoded.strikeachord.eventsystem.events.MidiMessageScheduled;
+
 import javax.sound.midi.*;
 
 public class MidiUtils {
@@ -82,9 +85,8 @@ public class MidiUtils {
                         theTrack.remove(event);
 
                         MidiMessage currentMessage = event.getMessage();
-                        MidiCache.addMidiMessage(currentMessage);
 
-                        //Handle the track here. DON'T FORGET TO REMOVE IT FROM THE BUFFER
+                        EventBus.Publisher.raiseEvent(new MidiMessageScheduled(currentMessage));
                     }
 
                     try {
