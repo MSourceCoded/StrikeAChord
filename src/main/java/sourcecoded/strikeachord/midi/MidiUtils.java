@@ -84,7 +84,7 @@ public class MidiUtils {
                         MidiMessage currentMessage = event.getMessage();
                         MidiCache.addMidiMessage(currentMessage);
 
-                        //Handle the track here
+                        //Handle the track here. DON'T FORGET TO REMOVE IT FROM THE BUFFER
                     }
 
                     try {
