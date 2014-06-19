@@ -1,9 +1,12 @@
 package sourcecoded.strikeachord.midi;
 
+import sourcecoded.strikeachord.StrikeAChord;
 import sourcecoded.strikeachord.eventsystem.EventBus;
 import sourcecoded.strikeachord.eventsystem.events.MidiMessageScheduled;
+import sourcecoded.strikeachord.utils.WorldCache;
 
 import javax.sound.midi.*;
+import java.util.Arrays;
 
 public class MidiUtils {
 
@@ -86,11 +89,18 @@ public class MidiUtils {
 
                         MidiMessage currentMessage = event.getMessage();
 
+                        System.err.println(Arrays.toString(currentMessage.getMessage()));
+
                         EventBus.Publisher.raiseEvent(new MidiMessageScheduled(currentMessage));
+
+
+                        //TODO change instruments based on octave?
+                        if(currentMessage.getMessage()[0] == -112)
+                        WorldCache.cachedWorld.playSoundEffect(StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, "note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
                     }
 
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(1);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

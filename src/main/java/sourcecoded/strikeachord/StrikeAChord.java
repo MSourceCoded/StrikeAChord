@@ -1,19 +1,23 @@
 package sourcecoded.strikeachord;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.EventBus;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import org.apache.logging.log4j.Level;
+import org.lwjgl.input.Keyboard;
+import sourcecoded.strikeachord.client.gui.MidiSetupGUI;
 import sourcecoded.strikeachord.proxy.CommonProxy;
 import sourcecoded.strikeachord.utils.WorldCache;
 
@@ -22,6 +26,8 @@ public class StrikeAChord {
 
     public static final String MODID = "strikeachord";
     public static final String VERSION = "1.7.2 - 0.0.1";
+
+    static KeyBinding menuKey;
 
     @SidedProxy(clientSide = "sourcecoded.strikeachord.proxy.ClientProxy", serverSide = "sourcecoded.strikeachord.proxy.CommonProxy")
     public static CommonProxy proxy;
@@ -38,7 +44,12 @@ public class StrikeAChord {
     @Mod.EventHandler
     public void init(FMLInitializationEvent ev) {
         MinecraftForge.EVENT_BUS.register(this);
+        FMLCommonHandler.instance().bus().register(this);
+
         proxy.registerProxy();
+
+        menuKey = new KeyBinding("[Strike A Chord] Options Menu", Keyboard.KEY_C, "Strike A Chord");
+        ClientRegistry.registerKeyBinding(menuKey);
     }
 
     @SideOnly(Side.CLIENT)
@@ -57,7 +68,9 @@ public class StrikeAChord {
     }
 
     @SubscribeEvent
-    public void event2(BonemealEvent ev) {
-        WorldCache.cachedWorld.playSoundEffect((double)ev.x, (double)ev.y, (double)ev.z, "note.harp", 3.0F, 1.0F);
+    public void onKey(InputEvent.KeyInputEvent ev) {
+        if (menuKey.getIsKeyPressed()) {
+            Minecraft.getMinecraft().displayGuiScreen(new MidiSetupGUI());
+        }
     }
 }
