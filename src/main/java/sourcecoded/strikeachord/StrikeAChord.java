@@ -13,6 +13,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
@@ -21,6 +22,7 @@ import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import org.lwjgl.input.Keyboard;
 import sourcecoded.strikeachord.client.gui.MidiSetupGUI;
+import sourcecoded.strikeachord.network.Pkt0x01Ping;
 import sourcecoded.strikeachord.network.SACPacketPipeline;
 import sourcecoded.strikeachord.proxy.CommonProxy;
 
@@ -29,6 +31,8 @@ public class StrikeAChord {
 
     public static final String MODID = "strikeachord";
     public static final String VERSION = "1.7.2 - 0.0.1";
+
+    public static boolean canTakePackets = false;
 
     @SideOnly(Side.CLIENT)
     static KeyBinding menuKey;
@@ -58,6 +62,15 @@ public class StrikeAChord {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent ev) {
 
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public void worldUnload(WorldEvent.Load ev) {
+        if (ev.world.isRemote) {
+            canTakePackets = false;
+            SACPacketPipeline.INSTANCE.sendToServer(new Pkt0x01Ping());
+        }
     }
 
     @SideOnly(Side.CLIENT)

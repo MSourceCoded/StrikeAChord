@@ -35,6 +35,8 @@ public enum SACPacketPipeline {
     private void addClientHandler() {
         FMLEmbeddedChannel channel = this.channels.get(Side.CLIENT);
         String codec = channel.findChannelHandlerNameForType(SACNetworkCodec.class);
+
+        channel.pipeline().addAfter(codec, "PingReply", new Pkt0x02PingReply());
     }
 
     private void addServerHandler() {
@@ -42,12 +44,15 @@ public enum SACPacketPipeline {
         String codec = channel.findChannelHandlerNameForType(SACNetworkCodec.class);
 
         channel.pipeline().addAfter(codec, "SoundSend", new Pkt0x00SoundSend());
+        channel.pipeline().addAfter("SoundSend", "PingRequest", new Pkt0x01Ping());
     }
 
     private class SACNetworkCodec extends FMLIndexedMessageToMessageCodec<IPacket> {
 
         public SACNetworkCodec() {
             addDiscriminator(0x00, Pkt0x00SoundSend.class);
+            addDiscriminator(0x01, Pkt0x01Ping.class);
+            addDiscriminator(0x02, Pkt0x02PingReply.class);
         }
 
         @Override
