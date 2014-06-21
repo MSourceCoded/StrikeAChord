@@ -1,13 +1,17 @@
 package sourcecoded.strikeachord.midi;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import sourcecoded.strikeachord.StrikeAChord;
 import sourcecoded.strikeachord.eventsystem.EventBus;
 import sourcecoded.strikeachord.eventsystem.events.MidiMessageScheduled;
-import sourcecoded.strikeachord.utils.WorldCache;
+import sourcecoded.strikeachord.network.Pkt0x00SoundSend;
+import sourcecoded.strikeachord.network.SACPacketPipeline;
 
 import javax.sound.midi.*;
 import java.util.Arrays;
@@ -75,31 +79,32 @@ public class MidiUtils {
     public static void stopRecording() {
         sequencer.stopRecording();
         refresh = false;
-    }
+                    }
 
-    public static void setRefresh(boolean val) {
-        refresh = val;
-    }
+                public static void setRefresh(boolean val) {
+                    refresh = val;
+                }
 
-    public static void doRefresh() {
-        refreshThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //Check the Track Bank here
-                while (refresh) {
-                    if (theTrack.size() != 0) {
-                        MidiEvent event = theTrack.get(0);
-                        theTrack.remove(event);
+                public static void doRefresh() {
+                    refreshThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Check the Track Bank here
+                            while (refresh) {
+                                if (theTrack.size() != 0) {
+                                    MidiEvent event = theTrack.get(0);
+                                    theTrack.remove(event);
 
-                        MidiMessage currentMessage = event.getMessage();
+                                    MidiMessage currentMessage = event.getMessage();
 
                         EventBus.Publisher.raiseEvent(new MidiMessageScheduled(currentMessage));
 
-                        if(currentMessage.getMessage()[0] == -112)
+                        if(currentMessage.getMessage()[0] == -112) {
                             //WorldCache.cachedWorld.playSoundEffect(StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, "note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
-                            ((EntityClientPlayerMP) StrikeAChord.proxy.getClientPlayer()).sendQueue.handleSoundEffect(new S29PacketSoundEffect("note.harp", StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24));
-
-                        System.err.println(Arrays.toString(currentMessage.getMessage()));
+                            StrikeAChord.proxy.getClientPlayer().playSound("note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
+                            SACPacketPipeline.INSTANCE.sendToServer(new Pkt0x00SoundSend(currentMessage.getMessage(), StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, StrikeAChord.proxy.getClientPlayer().dimension));
+                            //Do the server ping to make sure not to play twice
+                        }
                     }
 
                     try {
@@ -112,6 +117,17 @@ public class MidiUtils {
         });
 
         refreshThread.start();
+    }
+
+    public static void playToWorld(byte[] message, double x, double y, double z, int dim) {
+        WorldServer wrld = MinecraftServer.getServer().worldServerForDimension(dim);
+
+        float pitch = (float) (message[1] - 36) / 24;
+
+        if (wrld != null) {
+            wrld.playSoundEffect(x, y, z, "note.harp", 3.0F, pitch);
+        }
+
     }
 
 
