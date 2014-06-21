@@ -1,5 +1,9 @@
 package sourcecoded.strikeachord.midi;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.network.play.server.S29PacketSoundEffect;
+import net.minecraft.server.MinecraftServer;
 import sourcecoded.strikeachord.StrikeAChord;
 import sourcecoded.strikeachord.eventsystem.EventBus;
 import sourcecoded.strikeachord.eventsystem.events.MidiMessageScheduled;
@@ -89,12 +93,11 @@ public class MidiUtils {
 
                         MidiMessage currentMessage = event.getMessage();
 
-                        System.err.println(Arrays.toString(currentMessage.getMessage()));
-
                         EventBus.Publisher.raiseEvent(new MidiMessageScheduled(currentMessage));
 
                         if(currentMessage.getMessage()[0] == -112)
-                            WorldCache.cachedWorld.playSoundEffect(StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, "note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
+                            //WorldCache.cachedWorld.playSoundEffect(StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, "note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
+                            ((EntityClientPlayerMP) StrikeAChord.proxy.getClientPlayer()).sendQueue.handleSoundEffect(new S29PacketSoundEffect("note.harp", StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24));
 
                         System.err.println(Arrays.toString(currentMessage.getMessage()));
                     }

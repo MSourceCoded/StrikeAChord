@@ -14,7 +14,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
+import net.minecraftforge.event.world.ChunkDataEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import org.lwjgl.input.Keyboard;
 import sourcecoded.strikeachord.client.gui.MidiSetupGUI;
@@ -64,7 +67,13 @@ public class StrikeAChord {
         //Store the world in here for playsound
         if (!ev.world.isRemote) {
             WorldCache.cachedWorld = ev.world;
+            System.err.println("World Loaded: " + WorldCache.cachedWorld);
         }
+    }
+
+    @SubscribeEvent
+    public void event2(EntityJoinWorldEvent event) {
+        System.err.println(event.world);
     }
 
     @SubscribeEvent
