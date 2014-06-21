@@ -1,6 +1,7 @@
 package sourcecoded.strikeachord.network;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -18,7 +19,7 @@ public class Pkt0x01Ping extends SimpleChannelInboundHandler<Pkt0x01Ping> implem
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Pkt0x01Ping msg) throws Exception {
-        ctx.writeAndFlush(new Pkt0x02PingReply());
+    public void channelRead0(ChannelHandlerContext ctx, Pkt0x01Ping msg) throws Exception {
+        ctx.writeAndFlush(new Pkt0x02PingReply()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 }

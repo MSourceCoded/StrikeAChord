@@ -103,18 +103,19 @@ public class MidiUtils {
                             if (!StrikeAChord.canTakePackets)
                                 StrikeAChord.proxy.getClientPlayer().playSound("note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
 
-                            if (StrikeAChord.canTakePackets)
+                            if (StrikeAChord.canTakePackets) {
                                 SACPacketPipeline.INSTANCE.sendToServer(new Pkt0x00SoundSend(currentMessage.getMessage(), StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, StrikeAChord.proxy.getClientPlayer().dimension));
+                            }
                         }
-                    }
+                                }
 
-                    try {
-                        Thread.sleep(1);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+                                try {
+                                    Thread.sleep(1);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
         });
 
         refreshThread.start();
@@ -123,7 +124,9 @@ public class MidiUtils {
     public static void playToWorld(byte[] message, double x, double y, double z, int dim) {
         WorldServer wrld = MinecraftServer.getServer().worldServerForDimension(dim);
 
-        float pitch = (float) (message[1] - 36) / 24;
+        //float pitch = (float) (message[1] - 36) / 24;
+        float pitch = (float) Math.pow(2.0D, (message[1] - 60) / 60);
+        System.err.println("PlayWorld");
 
         if (wrld != null) {
             wrld.playSoundEffect(x, y, z, "note.harp", 3.0F, pitch);

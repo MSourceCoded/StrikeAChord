@@ -25,7 +25,8 @@ public class Pkt0x00SoundSend extends SimpleChannelInboundHandler<Pkt0x00SoundSe
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Pkt0x00SoundSend msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Pkt0x00SoundSend msg) throws Exception {
+        System.err.println("Packet");
         MidiUtils.playToWorld(msg.midiD, msg.px, msg.py, msg.pz, msg.dim);
     }
 

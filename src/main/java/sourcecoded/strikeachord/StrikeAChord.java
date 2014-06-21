@@ -9,10 +9,12 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -23,6 +25,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import org.lwjgl.input.Keyboard;
 import sourcecoded.strikeachord.client.gui.MidiSetupGUI;
 import sourcecoded.strikeachord.network.Pkt0x01Ping;
+import sourcecoded.strikeachord.network.Pkt0x02PingReply;
 import sourcecoded.strikeachord.network.SACPacketPipeline;
 import sourcecoded.strikeachord.proxy.CommonProxy;
 
@@ -32,7 +35,7 @@ public class StrikeAChord {
     public static final String MODID = "strikeachord";
     public static final String VERSION = "1.7.2 - 0.0.1";
 
-    public static boolean canTakePackets = false;
+    public static volatile boolean canTakePackets = false;
 
     @SideOnly(Side.CLIENT)
     static KeyBinding menuKey;
@@ -66,11 +69,16 @@ public class StrikeAChord {
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void worldUnload(WorldEvent.Load ev) {
+    public void worldLoad(WorldEvent.Load ev) {
         if (ev.world.isRemote) {
             canTakePackets = false;
-            SACPacketPipeline.INSTANCE.sendToServer(new Pkt0x01Ping());
         }
+    }
+
+    @SideOnly(Side.SERVER)
+    @SubscribeEvent
+    public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        SACPacketPipeline.INSTANCE.sendTo(new Pkt0x02PingReply(), (EntityPlayerMP) event.player);
     }
 
     @SideOnly(Side.CLIENT)

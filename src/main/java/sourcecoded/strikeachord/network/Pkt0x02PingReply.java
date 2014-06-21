@@ -19,7 +19,7 @@ public class Pkt0x02PingReply extends SimpleChannelInboundHandler<Pkt0x02PingRep
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Pkt0x02PingReply msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Pkt0x02PingReply msg) throws Exception {
         StrikeAChord.canTakePackets = true;
     }
 }
