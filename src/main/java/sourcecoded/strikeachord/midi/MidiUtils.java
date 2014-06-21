@@ -1,20 +1,16 @@
 package sourcecoded.strikeachord.midi;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import sourcecoded.strikeachord.StrikeAChord;
 import sourcecoded.strikeachord.eventsystem.EventBus;
 import sourcecoded.strikeachord.eventsystem.events.MidiMessageScheduled;
+import sourcecoded.strikeachord.midi.conversion.Instruments;
+import sourcecoded.strikeachord.midi.conversion.MidiToMC;
 import sourcecoded.strikeachord.network.Pkt0x00SoundSend;
 import sourcecoded.strikeachord.network.SACPacketPipeline;
 
 import javax.sound.midi.*;
-import java.util.Arrays;
 
 public class MidiUtils {
 
@@ -100,8 +96,11 @@ public class MidiUtils {
                         EventBus.Publisher.raiseEvent(new MidiMessageScheduled(currentMessage));
 
                         if(currentMessage.getMessage()[0] == -112) {
-                            if (!StrikeAChord.canTakePackets)
-                                StrikeAChord.proxy.getClientPlayer().playSound("note.harp", 3.0F, (float) (currentMessage.getMessage()[1] - 36) / 24);
+                            if (!StrikeAChord.canTakePackets) {
+                                Instruments instrument = Instruments.getInstrumentFromMidiMessage(currentMessage.getMessage());
+                                float pitch = MidiToMC.convertToPitch(currentMessage.getMessage(), instrument);
+                                StrikeAChord.proxy.getClientPlayer().playSound(instrument.getSoundName(), 3.0F, pitch);
+                            }
 
                             if (StrikeAChord.canTakePackets) {
                                 SACPacketPipeline.INSTANCE.sendToServer(new Pkt0x00SoundSend(currentMessage.getMessage(), StrikeAChord.proxy.getClientPlayer().posX, StrikeAChord.proxy.getClientPlayer().posY, StrikeAChord.proxy.getClientPlayer().posZ, StrikeAChord.proxy.getClientPlayer().dimension));
@@ -124,9 +123,8 @@ public class MidiUtils {
     public static void playToWorld(byte[] message, double x, double y, double z, int dim) {
         WorldServer wrld = MinecraftServer.getServer().worldServerForDimension(dim);
 
-        //float pitch = (float) (message[1] - 36) / 24;
-        float pitch = (float) Math.pow(2.0D, (message[1] - 60) / 60);
-        System.err.println("PlayWorld");
+        Instruments instrument = Instruments.getInstrumentFromMidiMessage(message);
+        float pitch = MidiToMC.convertToPitch(message, instrument);
 
         if (wrld != null) {
             wrld.playSoundEffect(x, y, z, "note.harp", 3.0F, pitch);
