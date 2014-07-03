@@ -33,7 +33,7 @@ import sourcecoded.strikeachord.proxy.CommonProxy;
 public class StrikeAChord {
 
     public static final String MODID = "strikeachord";
-    public static final String VERSION = "1.7.2 - 0.1.0";
+    public static final String VERSION = "1.7.10 - 0.1.0";
 
     public static volatile boolean canTakePackets = false;
 
